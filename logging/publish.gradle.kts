@@ -1,11 +1,6 @@
 import org.gradle.api.publish.PublishingExtension
 
 apply(plugin = "maven-publish")
-apply(plugin = "signing")
-
-// defined in user's global gradle.properties
-val sonatype_username: String? by project
-val sonatype_password: String? by project
 
 // defined in project's gradle.properties
 val groupId: String by project
@@ -78,18 +73,5 @@ configure<PublishingExtension> {
                 }
             }
         }
-    }
-
-    repositories {
-        maven("https://oss.sonatype.org/service/local/staging/deploy/maven2") {
-            credentials {
-                username = sonatype_username
-                password = sonatype_password
-            }
-        }
-    }
-
-    configure<SigningExtension> {
-        sign(publishing.publications)
     }
 }

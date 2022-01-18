@@ -1,7 +1,10 @@
+import org.jfrog.gradle.plugin.artifactory.task.ArtifactoryTask
+
 plugins {
     id("com.android.library")
     kotlin("multiplatform")
     id("org.jetbrains.dokka")
+    id("com.jfrog.artifactory")
 }
 
 kotlin {
@@ -68,10 +71,37 @@ tasks {
 }
 
 extra["artifactId"] = "kmlogging"
-extra["artifactVersion"] = "1.1.1"
+extra["artifactVersion"] = "1.1.2-anuvu"
 extra["libraryName"] = "KmLogging: Kotlin Multiplatform Logging"
 extra["libraryDescription"] = "KmLogging is a high performance, extensible and easy to use logging library for Kotlin Multiplatform development"
 extra["gitUrl"] = "https://github.com/LighthouseGames/KmLogging"
 
 apply(from = "publish.gradle.kts")
 
+// defined in user's global gradle.properties
+val artifactory_publish_url: String? by project
+val artifactory_publish_repo: String? by project
+val artifactory_publish_username: String? by project
+val artifactory_publish_password: String? by project
+
+if (project.hasProperty("artifactory_publish_url")) {
+    configure<org.jfrog.gradle.plugin.artifactory.dsl.ArtifactoryPluginConvention> {
+        setContextUrl(artifactory_publish_url)
+        publish {
+            repository {
+                setRepoKey(artifactory_publish_repo)
+                setUsername(artifactory_publish_username)
+                setPassword(artifactory_publish_password)
+            }
+            defaults {
+                publications("androidDebug", "androidRelease",
+                    "ios", "iosArm64", "iosX64", "iosSimulatorArm64",
+                    "kotlinMultiplatform", "metadata"
+                )
+                setPublishArtifacts(true)
+                setProperties(mapOf("qa.level" to "basic", "dev.team" to "core"))
+                setPublishPom(true)
+            }
+        }
+    }
+}
